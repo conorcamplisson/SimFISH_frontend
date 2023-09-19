@@ -2,8 +2,8 @@ server <- function(input, output, session) {
   showNotification("Hello new Shiny session!")
   #' Generating HTTP API endpoints and sending links to React
   #' Endpoint 1 for fetching ggplot (as svg)
-  ggplot_url_svg <- session$registerDataObj(
-    name = "example_plot_svg",
+  chrom_test <- session$registerDataObj(
+    name = "example_chrom_svg",
     data = list(),
     filterFunc = function(data, req) {
       if(req$REQUEST_METHOD == "GET") {
@@ -14,6 +14,23 @@ server <- function(input, output, session) {
         #' Reading a plot svg file as binary and passing it to the response
         readBin(tmp_path, "raw", 100000000) %>%
           httpResponse(200, "image/svg+xml", .)
+      }
+    }
+  )
+
+  ggplot_url_svg <- session$registerDataObj(
+    name = "example_plot_svg",
+    data = list(),
+    filterFunc = function(data, req) {
+      if(req$REQUEST_METHOD == "GET") {
+        params <- parseQueryString(req$QUERY_STRING)
+        # input <- fromJSON(params$url)
+        gg <- chromoMap("hg38_chrom_file.tsv" , "hg38_annot_telomere.tsv")
+        tmp_path <- paste0(tempfile(),".html")
+        htmlwidgets::saveWidget(gg, file = tmp_path)
+        #' Reading a plot svg file as binary and passing it to the response
+        readBin(tmp_path, "raw", 100000000) %>%
+          httpResponse(200, "text/html", .)
       }
     }
   )
@@ -42,7 +59,8 @@ server <- function(input, output, session) {
   session$sendCustomMessage("urls", {
     list(
       ggplot_url_svg = ggplot_url_svg,
-      example_get_people_url = example_get_people_url
+      example_get_people_url = example_get_people_url,
+      chrom_test = chrom_test
     )
   })
 
