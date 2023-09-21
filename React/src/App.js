@@ -1,7 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
+import axios from 'axios'
+import { AxiosProvider, Request, Get, Delete, Head, Post, Put, Patch, withAxios } from 'react-axios'
 
+import { Button } from '@mui/material'
+import { Container } from '@mui/material'
 import AppBar from './components/AppBar'
+import ParticlesBG from './components/ParticlesBG'
+import Dropdown from './components/Dropdown'
+import TextInput from './components/TextInput'
+import JobPlot from './components/JobPlot'
+import Typography from '@mui/material/Typography'
+import Box from '@mui/material/Box'
+import TextField from '@mui/material/TextField'
+
+const axiosInstance = axios.create({
+  baseURL: 'http://localhost:8080/api',
+  timeout: 10000,
+})
 
 function App() {
   const [shinyMessage, setShinyMessage] = useState('')
@@ -12,14 +28,14 @@ function App() {
   const [isLoadingPeopleData, setIsLoadingPeopleData] = useState(false)
 
   /* Receiving the data through websocket */
-  window.Shiny.addCustomMessageHandler('message_from_shiny', (msg) => {
-    setShinyMessage(msg)
-  })
+  // window.Shiny.addCustomMessageHandler('message_from_shiny', (msg) => {
+  //   setShinyMessage(msg)
+  // })
 
   /* Sending the message to Shiny through websocket */
-  const sendMessage = (e) => {
-    window.Shiny.setInputValue('message_from_react', e.target.value)
-  }
+  // const sendMessage = (e) => {
+  //   window.Shiny.setInputValue('message_from_react', e.target.value)
+  // }
 
   /* Receiving HTTP API URLs */
   window.Shiny.addCustomMessageHandler('urls', (urls) => {
@@ -46,50 +62,127 @@ function App() {
     setGgplotUrl(`${url}&title=${ggplotTitle}`)
   }
 
+  const [seqInputForm, setSeqInputForm] = useState('')
+  const [assembleID, setAssembleID] = useState('')
+  const [jobID, setJobID] = useState('')
+
+  const postData = async (urls) => {
+    const data = JSON.stringify({ assembly_id: assembleID, sequence: seqInputForm })
+    await axiosInstance
+      .post('/create_job', data)
+      // .then((response) => response.json())
+      .then((response) => {
+        setJobID(response.data.job_id)
+      })
+      .catch((error) => console.log(error))
+      .finally(() => console.log(jobID))
+  }
+  const sendRequest = () => {
+    postData(seqInputForm)
+  }
+
   return (
     <div className="App">
-      <AppBar />
-      <header className="App-header">
-        <p>HELLO</p>
-        <i>whereas</i>
-        <p>{shinyMessage}</p>
-        <p>but hey, you can send message back to Shiny (check your logs or notification):</p>
-        {/* <input type="text" onChange={sendMessage} /> */}
-        <div className="shiny-sections">
-          <div className="shiny-section">
-            <p>
-              And here <code>ggplot</code> fetched from Shiny through HTTP API:
-            </p>
-            <input
-              type="text"
-              placeholder="New title"
-              onChange={(e) => setGgplotTitle(e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={() => updatePlot(shinyUrls.ggplot_url_svg)}
-              className="shiny-button"
+      <AxiosProvider instance={axiosInstance}>
+        <AppBar />
+        <Container
+          sx={{
+            bgcolor: 'lightblue',
+            minHeight: '100vh',
+            fontSize: 'calc(10px + 2vmin)',
+            marginTop: 0,
+            color: 'darkblue',
+          }}
+          maxWidth={false}
+        >
+          <ParticlesBG />
+          <header>
+            <Typography variant="h4" component="div" style={{ paddingTop: '5rem' }}>
+              Start a New FISH Simulation
+            </Typography>
+            <Typography variant="subtitle1" component="div">
+              This tool simulates the genome-wide binding profile of candidate probes under
+              experimental hybridization conditions.
+            </Typography>
+          </header>
+          <Dropdown instance={axiosInstance} setAssemblyID={setAssembleID} />
+
+          <TextInput
+            header="Probe Sequence"
+            label="Please enter the probe sequence(s)"
+            id="fullWidth"
+            setInput={setSeqInputForm}
+            multi={true}
+          />
+          <Box
+            sx={{
+              width: '100%',
+              // maxWidth: 300,
+              // bgcolor: 'background.paper',
+              paddingTop: '0rem',
+              display: 'flex',
+              justifyContent: 'center',
+              paddingBottom: '0rem',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={sendRequest}
+              sx={{
+                display: 'flex',
+              }}
             >
-              Update title!
-            </button>
-            {ggplotUrl ? <iframe src={ggplotUrl} /> : null}
-          </div>
-          <div className="shiny-section">
-            <p>
-              Randomly generated data using <code>randomNames</code>
-              package fetched from Shiny through HTTP API:
-            </p>
-            <button type="button" onClick={updateData} className="shiny-button">
-              Generate list
-            </button>
-            {isLoadingPeopleData ? (
-              <p>Generating 500,000 rows</p>
-            ) : peopleData.length ? (
-              <div data={peopleData} />
-            ) : null}
-          </div>
-        </div>
-      </header>
+              Submit
+            </Button>
+          </Box>
+
+          <TextInput
+            header="Job ID"
+            label="Job ID"
+            placeholder="Enter JobID"
+            setInput={setJobID}
+            textValue={jobID}
+          />
+          {/* <p>{shinyMessage}</p> */}
+          {/* <input type="text" onChange={sendMessage} /> */}
+
+          {jobID ? <JobPlot jobID={jobID} shinyUrls={shinyUrls} /> : null}
+          {/* <div className="shiny-sections">
+            <div className="shiny-section">
+              <input
+                type="text"
+                placeholder="New title"
+                onChange={(e) => setGgplotTitle(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => updatePlot(shinyUrls.ggplot_url_svg)}
+                className="shiny-button"
+              >
+                Update title!
+              </button>
+              {ggplotUrl ? <iframe src={ggplotUrl} /> : null}
+            </div>
+            <div className="shiny-section">
+              <p>
+                Randomly generated data using <code>randomNames</code>
+                package fetched from Shiny through HTTP API:
+              </p>
+              <button type="button" onClick={updateData} className="shiny-button">
+                Generate list
+              </button>
+              {isLoadingPeopleData ? (
+                <p>Generating 500,000 rows</p>
+              ) : peopleData.length ? (
+                <div data={peopleData} />
+              ) : null}
+            </div>
+          </div> */}
+        </Container>
+      </AxiosProvider>
     </div>
   )
 }

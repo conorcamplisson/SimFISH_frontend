@@ -1,5 +1,5 @@
 server <- function(input, output, session) {
-  showNotification("Hello new Shiny session!")
+  # showNotification("Hello new Shiny session!")
   #' Generating HTTP API endpoints and sending links to React
   #' Endpoint 1 for fetching ggplot (as svg)
   chrom_test <- session$registerDataObj(
@@ -22,10 +22,20 @@ server <- function(input, output, session) {
     name = "example_plot_svg",
     data = list(),
     filterFunc = function(data, req) {
-      if(req$REQUEST_METHOD == "GET") {
-        params <- parseQueryString(req$QUERY_STRING)
+      if(req$REQUEST_METHOD == "POST") {
+        # params <- parseQueryString(req$QUERY_STRING)
         # input <- fromJSON(params$url)
-        gg <- chromoMap("hg38_chrom_file.tsv" , "hg38_annot_telomere.tsv")
+        buf <- req$rook.input$read(2^16) 
+        bufstring <- rawToChar(buf, multiple = FALSE)
+        json_data <- fromJSON(bufstring)
+        # extracting chromosome sizes from JSON string
+        chrom_df <- read.table(text=json_data$assembly$chrom_tsv_data)
+        # extracting annotation data from JSON string
+        annot_df <- read.table(text=json_data$results)
+        gg <- chromoMap(list(chrom_df), list(annot_df), data_based_color_map = T, title = paste(json_data$assembly$description, "Predicted Binding Sites"), title_font_size = 16,
+                data_type="numeric", fixed.window=T, remove.last.window = F, window.size=1000000, chr_color=c("#C0C0C0"),
+                data_color=list(c("#FFFF66","#FF9900", "#FF0000")), legend = T, lg_x = 150,
+                lg_y = 400, plot.legend.labels = "# Alignments", text_font_size = 13)
         tmp_path <- paste0(tempfile(),".html")
         htmlwidgets::saveWidget(gg, file = tmp_path)
         #' Reading a plot svg file as binary and passing it to the response
