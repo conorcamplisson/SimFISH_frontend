@@ -26,7 +26,7 @@ export default function ButtonAppBar() {
       >
         <Toolbar>
           <Typography variant="h3" component="div" sx={{ flexGrow: 1 }}>
-            Genome-wide Fluorescence In Situ Hybridization Simulation
+            Genome-Wide Fluorescence In Situ Hybridization Simulation
           </Typography>
           {/*<Button variant="contained" color="primary">
             Try it

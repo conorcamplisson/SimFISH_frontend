@@ -141,7 +141,7 @@ function App() {
 
             <TextInput
               header="Probe Sequence"
-              label="Please enter the probe sequence(s) or drag and drop a valid FASTA file!"
+              label="Please enter your probe sequence(s) or drag and drop a valid FASTA file!"
               id="fullWidth"
               setInput={setSeqInputForm}
               multi={true}
