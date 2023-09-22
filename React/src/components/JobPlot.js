@@ -6,11 +6,12 @@ import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
 import CardMedia from '@mui/material/CardMedia'
 import TextField from '@mui/material/TextField'
-
+import Skeleton from '@mui/material/Skeleton'
 import axios from 'axios'
 import { AxiosProvider, Request, Get, Delete, Head, Post, Put, Patch, withAxios } from 'react-axios'
 
 import TextInput from './TextInput'
+import { Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 
 // const StyledIFrame = styled.iframe`
@@ -27,25 +28,73 @@ const JobPlot = forwardRef((props, ref) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        flexDirection: 'column',
       }}
     >
       <Get url={'/job/' + props.jobID}>
         {(error, response, isLoading, makeRequest, axios) => {
           if (error) {
             return (
-              <div>
-                Something bad happened today: {error.message}{' '}
-                <Button onClick={() => makeRequest({ params: { reload: true } })}>Retry</Button>
-              </div>
+              <>
+                <Typography variant="h6" component="div">
+                  Error to /job/ endpoint: {error.message}
+                </Typography>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => makeRequest({ params: { reload: true } })}
+                  sx={{ marginBottom: '1rem' }}
+                >
+                  Retry
+                </Button>
+              </>
             )
           } else if (isLoading) {
-            return <div>Loading...</div>
-          } else if (response !== null && !response.data.results) {
-            return <div>No results found</div>
-          } else if (response !== null) {
             return (
-              <div>
-                <Button onClick={() => makeRequest({ params: { refresh: true } })}>Refresh</Button>
+              <>
+                <Skeleton
+                  animation="wave"
+                  variant="rounded"
+                  width={1100}
+                  height={60}
+                  sx={{ margin: 1 }}
+                />
+                <Skeleton animation="wave" variant="rounded" width={1100} height={200} />
+              </>
+            )
+          } else if (response !== null && !response.data.results) {
+            return (
+              <Typography variant="h6" component="div">
+                No alignments found
+              </Typography>
+            )
+          } else if (response !== null && !response.data.is_done) {
+            return (
+              <>
+                <Typography variant="h6" component="div">
+                  JobID {props.jobID} is not done yet! Please try again later.
+                </Typography>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => makeRequest({ params: { reload: true } })}
+                  sx={{ marginBottom: '1rem' }}
+                >
+                  Retry
+                </Button>
+              </>
+            )
+          } else if (response !== null && response.data.is_done) {
+            return (
+              <>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => makeRequest({ params: { refresh: true } })}
+                  sx={{ marginBottom: '1rem' }}
+                >
+                  Refresh
+                </Button>
                 <Post
                   instance={axios.create({ baseURL: '/' })}
                   url={props.shinyUrls.ggplot_url_svg}
@@ -54,15 +103,33 @@ const JobPlot = forwardRef((props, ref) => {
                   {(error, response, isLoading, makeRequest, axios) => {
                     if (error) {
                       return (
-                        <div>
-                          Something bad happened: {error.message}{' '}
-                          <Button onClick={() => makeRequest({ params: { reload: true } })}>
-                            Retry this post
+                        <>
+                          <Typography variant="h6" component="div">
+                            Error to Chromograph endpoint: {error.message}
+                          </Typography>
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={() => makeRequest({ params: { reload: true } })}
+                            sx={{ marginBottom: '1rem' }}
+                          >
+                            Retry
                           </Button>
-                        </div>
+                        </>
                       )
                     } else if (isLoading) {
-                      return <div>Loading...</div>
+                      return (
+                        <>
+                          <Skeleton
+                            animation="wave"
+                            variant="rounded"
+                            width={1100}
+                            height={60}
+                            sx={{ margin: 1 }}
+                          />
+                          <Skeleton animation="wave" variant="rounded" width={1100} height={200} />
+                        </>
+                      )
                     } else if (response !== null) {
                       return (
                         <Card
@@ -90,13 +157,35 @@ const JobPlot = forwardRef((props, ref) => {
                         // <iframe srcDoc={response.data} frameborder="no" />
                       )
                     }
-                    return <div>Default message before request is made.</div>
+                    return (
+                      <>
+                        <Skeleton
+                          animation="wave"
+                          variant="rounded"
+                          width={1100}
+                          height={60}
+                          sx={{ margin: 1 }}
+                        />
+                        <Skeleton animation="wave" variant="rounded" width={1100} height={200} />
+                      </>
+                    )
                   }}
                 </Post>
-              </div>
+              </>
             )
           }
-          return <div>Default message before request is made.</div>
+          return (
+            <>
+              <Skeleton
+                animation="wave"
+                variant="rounded"
+                width={1100}
+                height={60}
+                sx={{ margin: 1 }}
+              />
+              <Skeleton animation="wave" variant="rounded" width={1100} height={200} />
+            </>
+          )
         }}
       </Get>
     </Box>

@@ -34,11 +34,11 @@ const ParticlesBG = forwardRef((props, ref) => {
           },
           particles: {
             color: {
-              value: '#0d47a1',
+              value: 'random',
             },
             links: {
-              color: '#0d47a1',
-              distance: 150,
+              color: 'random',
+              distance: 100,
               enable: true,
               opacity: 0.5,
               width: 1,
@@ -58,7 +58,7 @@ const ParticlesBG = forwardRef((props, ref) => {
                 enable: true,
                 area: 800,
               },
-              value: 20,
+              value: 40,
             },
             opacity: {
               value: 0.5,

@@ -13,10 +13,38 @@ import JobPlot from './components/JobPlot'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
-
+import { createTheme, ThemeProvider } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:8080/api',
   timeout: 10000,
+})
+
+const theme = createTheme({
+  typography: {
+    // fontFamily: 'Roboto',
+    h4: {
+      fontWeight: 900,
+    },
+    h3: {
+      fontWeight: 900,
+    },
+  },
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#3daed5',
+    },
+    secondary: {
+      main: '#c2e0f9',
+    },
+    background: {
+      default: '#0b3b6d',
+    },
+    text: {
+      primary: '#e3f2fd',
+    },
+  },
 })
 
 function App() {
@@ -84,73 +112,77 @@ function App() {
   return (
     <div className="App">
       <AxiosProvider instance={axiosInstance}>
-        <AppBar />
-        <Container
-          sx={{
-            bgcolor: 'lightblue',
-            minHeight: '100vh',
-            fontSize: 'calc(10px + 2vmin)',
-            marginTop: 0,
-            color: 'darkblue',
-          }}
-          maxWidth={false}
-        >
-          <ParticlesBG />
-          <header>
-            <Typography variant="h4" component="div" style={{ paddingTop: '5rem' }}>
-              Start a New FISH Simulation
-            </Typography>
-            <Typography variant="subtitle1" component="div">
-              This tool simulates the genome-wide binding profile of candidate probes under
-              experimental hybridization conditions.
-            </Typography>
-          </header>
-          <Dropdown instance={axiosInstance} setAssemblyID={setAssembleID} />
-
-          <TextInput
-            header="Probe Sequence"
-            label="Please enter the probe sequence(s)"
-            id="fullWidth"
-            setInput={setSeqInputForm}
-            multi={true}
-          />
-          <Box
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Container
             sx={{
-              width: '100%',
-              // maxWidth: 300,
-              // bgcolor: 'background.paper',
-              paddingTop: '0rem',
-              display: 'flex',
-              justifyContent: 'center',
-              paddingBottom: '0rem',
-              flexDirection: 'column',
-              alignItems: 'center',
+              // bgcolor: theme.palette.background.default,
+              background: 'linear-gradient(to right bottom, #8360c3, #2ebf91)',
+              minHeight: '100vh',
+              fontSize: 'calc(10px + 2vmin)',
+              marginTop: 0,
+              // color: 'darkblue',
             }}
+            maxWidth={false}
           >
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={sendRequest}
+            <AppBar />
+
+            <ParticlesBG />
+            <Box sx={{ position: 'relative', zIndex: 1 }}>
+              <Typography variant="h4" component="div" style={{ paddingTop: '3rem' }}>
+                Start a New FISH Simulation
+              </Typography>
+              <Typography variant="subtitle1" component="div">
+                This tool simulates the genome-wide binding profile of candidate probes under
+                experimental hybridization conditions.
+              </Typography>
+            </Box>
+            <Dropdown instance={axiosInstance} setAssemblyID={setAssembleID} />
+
+            <TextInput
+              header="Probe Sequence"
+              label="Please enter the probe sequence(s) or drag and drop a valid FASTA file!"
+              id="fullWidth"
+              setInput={setSeqInputForm}
+              multi={true}
+            />
+            <Box
               sx={{
+                width: '100%',
+                // maxWidth: 300,
+                // bgcolor: 'background.paper',
+                paddingTop: '0rem',
                 display: 'flex',
+                justifyContent: 'center',
+                paddingBottom: '0rem',
+                flexDirection: 'column',
+                alignItems: 'center',
               }}
             >
-              Submit
-            </Button>
-          </Box>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={sendRequest}
+                sx={{
+                  display: 'flex',
+                }}
+              >
+                Submit
+              </Button>
+            </Box>
 
-          <TextInput
-            header="Job ID"
-            label="Job ID"
-            placeholder="Enter JobID"
-            setInput={setJobID}
-            textValue={jobID}
-          />
-          {/* <p>{shinyMessage}</p> */}
-          {/* <input type="text" onChange={sendMessage} /> */}
+            <TextInput
+              header="Job ID"
+              label="Job ID"
+              placeholder="Enter JobID"
+              setInput={setJobID}
+              textValue={jobID}
+            />
+            {/* <p>{shinyMessage}</p> */}
+            {/* <input type="text" onChange={sendMessage} /> */}
 
-          {jobID ? <JobPlot jobID={jobID} shinyUrls={shinyUrls} /> : null}
-          {/* <div className="shiny-sections">
+            {jobID ? <JobPlot jobID={jobID} shinyUrls={shinyUrls} /> : null}
+            {/* <div className="shiny-sections">
             <div className="shiny-section">
               <input
                 type="text"
@@ -181,7 +213,8 @@ function App() {
               ) : null}
             </div>
           </div> */}
-        </Container>
+          </Container>
+        </ThemeProvider>
       </AxiosProvider>
     </div>
   )

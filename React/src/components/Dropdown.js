@@ -10,6 +10,7 @@ import Divider from '@mui/material/Divider'
 import InboxIcon from '@mui/icons-material/Inbox'
 import DraftsIcon from '@mui/icons-material/Drafts'
 import TextField from '@mui/material/TextField'
+import Paper from '@mui/material/Paper'
 
 const Dropdown = forwardRef(({ setAssemblyID, instance }, ref) => {
   const [dropdown, setDropdown] = useState(null)
@@ -56,40 +57,49 @@ const Dropdown = forwardRef(({ setAssemblyID, instance }, ref) => {
         width: '100%',
         // maxWidth: 300,
         // bgcolor: 'background.paper',
-        paddingTop: '4rem',
+        paddingTop: '2rem',
         display: 'flex',
         justifyContent: 'center',
-        paddingBottom: '5rem',
+        paddingBottom: '2rem',
+        position: 'relative',
+        zIndex: 1,
       }}
     >
-      <Autocomplete
-        inputValue={inputValue}
-        onInputChange={(event, newInputValue) => {
-          setInputValue(newInputValue)
-        }}
-        id="ref-select"
-        sx={{ width: 300 }}
-        options={!dropdown ? [{ description: 'Loading...' }] : dropdown}
-        autoHighlight
-        getOptionLabel={(option) => option.description}
-        defaultValue={!dropdown ? { id: 20, description: 'hg38 (Human Genome)' } : dropdown[0]}
-        renderOption={(props, option) => (
-          <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
-            {option.description}
-          </Box>
-        )}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Select reference assembly"
-            variant="filled"
-            inputProps={{
-              ...params.inputProps,
-              autoComplete: 'new-password', // disable autocomplete and autofill
-            }}
-          />
-        )}
-      />
+      <Paper square={false} elevation={6} sx={{ bgcolor: 'background.paper' }}>
+        <Autocomplete
+          inputValue={inputValue}
+          onInputChange={(event, newInputValue) => {
+            setInputValue(newInputValue)
+          }}
+          id="ref-select"
+          sx={{ width: 300 }}
+          options={!dropdown ? [{ description: 'Loading...' }] : dropdown}
+          autoHighlight
+          getOptionLabel={(option) => option.description}
+          defaultValue={!dropdown ? { id: 20, description: 'hg38 (Human Genome)' } : dropdown[0]}
+          renderOption={(props, option) => (
+            <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
+              {option.description}
+            </Box>
+          )}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Select reference assembly"
+              variant="filled"
+              inputProps={{
+                ...params.inputProps,
+                autoComplete: 'new-password', // disable autocomplete and autofill
+              }}
+              // InputProps={{
+              //   ...params.inputProps,
+              //   sx: { bgcolor: 'background.paper' },
+              //   autoComplete: 'new-password',
+              // }}
+            />
+          )}
+        />
+      </Paper>
     </Box>
   )
 })
